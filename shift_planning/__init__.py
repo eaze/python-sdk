@@ -37,9 +37,15 @@ import codecs
 import mimetypes
 import os
 import simplejson
+import sys
 import types
-import urllib
-import urllib2
+
+if sys.version_info[0] < 3:
+    from urllib import urlencode
+    from urllib2 import Request, urlopen
+else:
+    from urllib.parse import urlencode
+    from urllib.request import Request, urlopen
 
 response_codes = {
     '-3':'Flagged API Key - Pemanently Banned',
@@ -155,17 +161,17 @@ class ShiftPlanning(object):
         'data' POST variable. """
         data = ''
         if self.token and not filedata:
-            data = urllib.urlencode([('data', simplejson.dumps({'token':self.token,'request':params}))])
+            data = urlencode([('data', simplejson.dumps({'token':self.token,'request':params}))])
         if filedata:#it's a file upload
             data = simplejson.dumps({'token':self.token,'request':params})
-            data = urllib.urlencode([('data', data),('filedata',filedata)])
+            data = urlencode([('data', data),('filedata',filedata)])
             
         if not self.token and not filedata:#this is a login request
-            data = urllib.urlencode([('data', simplejson.dumps({'key':self.key,'request':params}))])
+            data = urlencode([('data', simplejson.dumps({'key':self.key,'request':params}))])
         
-        req = urllib2.Request(self.api_endpoint,headers={'accept-charset':'UTF-8'})
+        req = Request(self.api_endpoint,headers={'accept-charset':'UTF-8'})
         try:
-            reader = urllib2.urlopen(req, data)
+            reader = urlopen(req, data)
         except:
             raise Exception("Cannot open the URL, please make sure API endpoint is correct.")
         if reader.code != 200:
