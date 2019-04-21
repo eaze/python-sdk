@@ -170,6 +170,8 @@ class ShiftPlanning(object):
             data = urlencode([('data', simplejson.dumps({'key':self.key,'request':params}))])
         
         req = Request(self.api_endpoint,headers={'accept-charset':'UTF-8'})
+        if isinstance(data, str):
+            data = data.encode('utf-8')
         try:
             reader = urlopen(req, data)
         except:
@@ -183,7 +185,7 @@ class ShiftPlanning(object):
             return (None, "No JSON object received from server.")
         response = simplejson.loads(response)
         
-        if response.has_key('error'):
+        if 'error' in response:
             return {'error':response['error']}
         else:
             self.response_data = response['data']
@@ -191,7 +193,7 @@ class ShiftPlanning(object):
             if self.callback:
                 self.callback()
         if params['module'] == 'staff.login':
-            if response.has_key('token'):
+            if 'token' in response:
                 self.token = response['token']
         
         
